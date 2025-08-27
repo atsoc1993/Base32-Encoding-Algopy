@@ -1,7 +1,7 @@
 from contract_files.client import SenderToUtf8Factory
 from algosdk.account import address_from_private_key
 from algokit_utils import AlgorandClient, SigningAccount, CommonAppCallParams, AlgoAmount
-from dotenv import load_dotenv, set_key
+from dotenv import load_dotenv
 import os
 
 
