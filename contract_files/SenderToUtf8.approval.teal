@@ -1,0 +1,296 @@
+#pragma version 10
+#pragma typetrack false
+
+// contract.SenderToUtf8.__algopy_entrypoint_with_init() -> uint64:
+main:
+    intcblock 0 1 5 8
+    bytecblock 0x068101 "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+    // contract.py:5
+    // class SenderToUtf8(ARC4Contract):
+    txn NumAppArgs
+    bz main_bare_routing@6
+    pushbytes 0x999f5139 // method "base32_sender_address()void"
+    txna ApplicationArgs 0
+    match main_base32_sender_address_route@5
+
+main_after_if_else@8:
+    // contract.py:5
+    // class SenderToUtf8(ARC4Contract):
+    intc_0 // 0
+    return
+
+main_base32_sender_address_route@5:
+    // contract.py:9
+    // @abimethod
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub base32_sender_address
+    intc_1 // 1
+    return
+
+main_bare_routing@6:
+    // contract.py:5
+    // class SenderToUtf8(ARC4Contract):
+    txn OnCompletion
+    bnz main_after_if_else@8
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    intc_1 // 1
+    return
+
+
+// contract.SenderToUtf8.base32_sender_address() -> void:
+base32_sender_address:
+    // contract.py:9-10
+    // @abimethod
+    // def base32_sender_address(self) -> None:
+    proto 0 0
+    intc_0 // 0
+    // contract.py:12
+    // pk = Txn.sender.bytes
+    txn Sender
+    // contract.py:14
+    // h = op.sha512_256(pk)
+    dup
+    sha512_256
+    // contract.py:15
+    // cksum = h[28:32]
+    substring 28 32
+    // contract.py:18
+    // raw.extend(DynamicBytes(pk))
+    pushbytes 0x0020
+    uncover 2
+    concat
+    extract 2 0
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    // contract.py:19
+    // raw.extend(DynamicBytes(cksum))
+    extract 2 0
+    dig 1
+    len
+    itob
+    extract 6 2
+    uncover 2
+    concat
+    extract 2 0
+    concat
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    // contract.py:21
+    // data = raw.native
+    extract 2 0
+    dup
+    // contract.py:22
+    // bits = UInt64(0)
+    intc_0 // 0
+    swap
+    // contract.py:23
+    // bitlen = UInt64(0)
+    intc_0 // 0
+    swap
+    // contract.py:24
+    // out = DynamicBytes()
+    pushbytes 0x0000
+    swap
+    // contract.py:26
+    // for i in urange(data.length):
+    len
+    intc_0 // 0
+
+base32_sender_address_for_header@1:
+    // contract.py:26
+    // for i in urange(data.length):
+    frame_dig 6
+    frame_dig 5
+    <
+    bz base32_sender_address_after_for@7
+
+base32_sender_address_while_top@12:
+    pushint 710 // 710
+    global OpcodeBudget
+    >
+    bz base32_sender_address_after_while@17
+    itxn_begin
+    pushint 6 // appl
+    itxn_field TypeEnum
+    intc_2 // DeleteApplication
+    itxn_field OnCompletion
+    bytec_0 // 0x068101
+    itxn_field ApprovalProgram
+    bytec_0 // 0x068101
+    itxn_field ClearStateProgram
+    intc_0 // 0
+    itxn_field Fee
+    itxn_submit
+    b base32_sender_address_while_top@12
+
+base32_sender_address_after_while@17:
+    // contract.py:29
+    // b = arc4.UInt64.from_bytes(data[i]).native
+    frame_dig 1
+    frame_dig 6
+    getbyte
+    // contract.py:30
+    // bits = (bits << UInt64(8)) | b
+    frame_dig 2
+    intc_3 // 8
+    shl
+    |
+    frame_bury 2
+    // contract.py:31
+    // bitlen += UInt64(8)
+    frame_dig 3
+    intc_3 // 8
+    +
+    frame_bury 3
+
+base32_sender_address_while_top@3:
+    // contract.py:33
+    // while bitlen >= UInt64(5):
+    frame_dig 3
+    intc_2 // 5
+    >=
+    bz base32_sender_address_after_while@5
+    // contract.py:34
+    // bitlen -= UInt64(5)
+    frame_dig 3
+    intc_2 // 5
+    -
+    dup
+    frame_bury 3
+    // contract.py:35
+    // idx = (bits >> bitlen) & UInt64(0b11111)
+    frame_dig 2
+    swap
+    shr
+    pushint 31 // 31
+    &
+    // contract.py:37
+    // out.append(Byte(arc4.UInt64.from_bytes(ch).native))
+    frame_dig 4
+    extract 2 0
+    // contract.py:11
+    // ALPHABET = String("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567").bytes
+    bytec_1 // "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+    // contract.py:37
+    // out.append(Byte(arc4.UInt64.from_bytes(ch).native))
+    uncover 2
+    getbyte
+    itob
+    dup
+    bitlen
+    intc_3 // 8
+    <=
+    assert // overflow
+    extract 7 1
+    concat
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    frame_bury 4
+    b base32_sender_address_while_top@3
+
+base32_sender_address_after_while@5:
+    // contract.py:26
+    // for i in urange(data.length):
+    frame_dig 6
+    intc_1 // 1
+    +
+    frame_bury 6
+    b base32_sender_address_for_header@1
+
+base32_sender_address_after_for@7:
+    frame_dig 4
+    frame_bury 0
+    // contract.py:39
+    // if bitlen > UInt64(0):
+    frame_dig 3
+    bz base32_sender_address_after_if_else@9
+    // contract.py:40
+    // idx = (bits << (UInt64(5) - bitlen)) & UInt64(0b11111)
+    intc_2 // 5
+    frame_dig 3
+    -
+    frame_dig 2
+    swap
+    shl
+    pushint 31 // 31
+    &
+    // contract.py:42
+    // out.append(Byte(arc4.UInt64.from_bytes(ch).native))
+    frame_dig 4
+    extract 2 0
+    // contract.py:11
+    // ALPHABET = String("ABCDEFGHIJKLMNOPQRSTUVWXYZ234567").bytes
+    bytec_1 // "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
+    // contract.py:42
+    // out.append(Byte(arc4.UInt64.from_bytes(ch).native))
+    uncover 2
+    getbyte
+    itob
+    dup
+    bitlen
+    intc_3 // 8
+    <=
+    assert // overflow
+    extract 7 1
+    concat
+    dup
+    len
+    itob
+    extract 6 2
+    swap
+    concat
+    frame_bury 0
+
+base32_sender_address_after_if_else@9:
+    frame_dig 0
+    // contract.py:44
+    // addr_str = String.from_bytes(out.native)
+    extract 2 0
+    // contract.py:46-50
+    // itxn.Payment(
+    //     amount=0,
+    //     receiver=Txn.sender,
+    //     note=addr_str
+    // ).submit()
+    itxn_begin
+    // contract.py:48
+    // receiver=Txn.sender,
+    txn Sender
+    itxn_field Receiver
+    itxn_field Note
+    // contract.py:47
+    // amount=0,
+    intc_0 // 0
+    itxn_field Amount
+    // contract.py:46
+    // itxn.Payment(
+    intc_1 // pay
+    itxn_field TypeEnum
+    intc_0 // 0
+    itxn_field Fee
+    // contract.py:46-50
+    // itxn.Payment(
+    //     amount=0,
+    //     receiver=Txn.sender,
+    //     note=addr_str
+    // ).submit()
+    itxn_submit
+    retsub
