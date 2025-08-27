@@ -5,7 +5,7 @@ from dotenv import load_dotenv, set_key
 import os
 
 algorand = AlgorandClient.testnet()
-load_dotenv('../.env')
+load_dotenv('.env')
 sk = os.getenv('test_account_1')
 pk = address_from_private_key(sk)
 print(pk)
