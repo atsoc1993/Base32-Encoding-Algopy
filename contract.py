@@ -23,6 +23,7 @@ class SenderToUtf8(ARC4Contract):
         bitlen = UInt64(0)
         out = DynamicBytes()
 
+
         for i in urange(data.length):
             ensure_budget(required_budget=700, fee_source=OpUpFeeSource.GroupCredit)
 
